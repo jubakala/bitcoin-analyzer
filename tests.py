@@ -1,6 +1,6 @@
 import unittest
 from unittest import TestCase
-from utils import datetime_to_timestamp, add_hour, get_data, load_file, timestamp_to_date, get_days, create_price_date_dict, organize_prices_by_date, get_midnight_price
+from utils import datetime_to_timestamp, add_hour, get_data, load_file, timestamp_to_date, get_days, create_price_date_dict, organize_prices_by_date, get_midnight_price, find_longest_bearish_trend, form_url, get_highest_trading_volume
 
 
 class ApiTest(TestCase):
@@ -42,16 +42,27 @@ class ApiTest(TestCase):
 
 	# def test_add_hour(self):
 	# 	# Add an hour to '2021-01-01'.
-	# 	added_timestamp = add_hour("2021-01-01")
+	# 	added_timestamp = add_hour(1609459200)
 	# 	expected = 1609462800
 
 	# 	self.assertEqual(added_timestamp, expected)
 
-
-	# def test_add_hour_invalid_input(self):
-	# 	added_timestamp = add_hour("87654321")
-
+	# 	# Invalid input.
+	# 	added_timestamp = add_hour("something")
 	# 	self.assertIsNone(added_timestamp)
+
+
+	# def test_form_url(self):
+	# 	crypto_currency = "bitcoin"
+	# 	fiat_currency = "eur"
+	# 	start_date = "2020-01-01"
+	# 	end_date = "2020-12-31"
+
+	# 	url_data = form_url(crypto_currency, fiat_currency, start_date, end_date)
+	# 	expected = { "url": "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=eur&from=1577836800&to=1609376400", "error": "" }
+
+	# 	self.assertEqual(url_data['url'], expected['url'])
+	# 	self.assertEqual(url_data['error'], expected['error'])
 
 
 	# def test_get_data_by_url(self):
@@ -63,8 +74,6 @@ class ApiTest(TestCase):
 
 	# 	url = f"https://api.coingecko.com/api/v3/coins/{crypto_currency}/market_chart/range?vs_currency={fiat_currency}&from={start_date}&to={end_date}"
 	# 	json_data = get_data(url)
-
-	# 	print(json_data)
 
 	# 	self.assertTrue('prices' in json_data)
 
@@ -113,33 +122,58 @@ class ApiTest(TestCase):
 	# 	self.assertEqual(organized_prices, expected)
 
 
-	def test_get_midnight_price(self):
-		date_str = "2020-01-02"
-		day_prices = [[1577923200000, 6412.448167227617]]
-		prev_day_prices = [[1577836800000, 6412.84639784161]]
-		midnight_price = get_midnight_price(date_str, day_prices, prev_day_prices)
-		expected = 6412.448167227617
+	# def test_get_midnight_price(self):
+	# 	date_str = "2020-01-02"
+	# 	day_prices = [[1577923200000, 6412.448167227617]]
+	# 	prev_day_prices = [[1577836800000, 6412.84639784161]]
+	# 	midnight_price = get_midnight_price(date_str, day_prices, prev_day_prices)
+	# 	expected = 6412.448167227617
 
-		self.assertEqual(midnight_price, expected)
-
-
-	def test_get_midnight_price2(self):
-		date_str = "2020-01-02"
-		day_prices = [[1577923235223, 6413.051795808254], [1577927145804, 6419.084371212281], [1577930733698, 6392.367191498962], [1577934447405, 6378.0750217390005], [1577937931269, 6348.1781473406545], [1577941655270, 6373.474640375365], [1577945118069, 6363.841848813113], [1577948687580, 6359.356689913901], [1577952284835, 6344.350466003507], [1577955849770, 6375.709214312489], [1577959753494, 6390.020679840621], [1577963256994, 6393.573096018375], [1577966701336, 6382.492481923091], [1577970568353, 6391.428200519827], [1577973646800, 6363.1359014027885], [1577977521707, 6383.578389826709], [1577981168137, 6378.76254467646], [1577984566594, 6321.199403361324], [1577988735259, 6234.781879558442], [1577991745726, 6248.848795231115], [1577995453801, 6256.160212581229], [1577999375587, 6232.533890958317], [1578002702067, 6249.198431984557], [1578006042775, 6249.151313222172]]
-		prev_day_prices = [[1577837037103, 6412.84639784161], [1577840443088, 6400.183195857016], [1577844174112, 6452.701266161403], [1577848140451, 6472.734997584653], [1577851238015, 6463.273479119187], [1577855114844, 6459.984936772221], [1577858869352, 6466.275022382196], [1577862464201, 6445.939706616753], [1577866051896, 6427.706404769181], [1577869367988, 6408.749636232671], [1577872864963, 6408.922572379971], [1577876736509, 6416.878539022916], [1577880529069, 6416.232375709836], [1577883926430, 6420.0381517729265], [1577887639980, 6415.875056068972], [1577890824719, 6440.739721596347], [1577894995373, 6430.386758909359], [1577898034524, 6458.564511092221], [1577901618835, 6447.260372770252], [1577905779503, 6427.049100904037], [1577908846483, 6418.772496993268], [1577912653436, 6448.265169960227], [1577916261128, 6424.911291990242], [1577919763140, 6412.022709010401]]
-		midnight_price = get_midnight_price(date_str, day_prices, prev_day_prices)
-		expected = 6413.051795808254
-
-		self.assertEqual(midnight_price, expected)		
+	# 	self.assertEqual(midnight_price, expected)
 
 
-	def test_find_longest_bearish_trend(self):
-	# 	data = load_file("prices_1_month.json")
-	# 	days = get_days(data)
-	# 	price_date_dict = create_price_date_dict(days)
-	# 	organized_prices = organize_prices_by_date(price_date_dict, data['prices'])
+	# def test_get_midnight_price2(self):
+	# 	date_str = "2020-01-02"
+	# 	day_prices = [[1577923235223, 6413.051795808254], [1577927145804, 6419.084371212281], [1577930733698, 6392.367191498962], [1577934447405, 6378.0750217390005], [1577937931269, 6348.1781473406545], [1577941655270, 6373.474640375365], [1577945118069, 6363.841848813113], [1577948687580, 6359.356689913901], [1577952284835, 6344.350466003507], [1577955849770, 6375.709214312489], [1577959753494, 6390.020679840621], [1577963256994, 6393.573096018375], [1577966701336, 6382.492481923091], [1577970568353, 6391.428200519827], [1577973646800, 6363.1359014027885], [1577977521707, 6383.578389826709], [1577981168137, 6378.76254467646], [1577984566594, 6321.199403361324], [1577988735259, 6234.781879558442], [1577991745726, 6248.848795231115], [1577995453801, 6256.160212581229], [1577999375587, 6232.533890958317], [1578002702067, 6249.198431984557], [1578006042775, 6249.151313222172]]
+	# 	prev_day_prices = [[1577837037103, 6412.84639784161], [1577840443088, 6400.183195857016], [1577844174112, 6452.701266161403], [1577848140451, 6472.734997584653], [1577851238015, 6463.273479119187], [1577855114844, 6459.984936772221], [1577858869352, 6466.275022382196], [1577862464201, 6445.939706616753], [1577866051896, 6427.706404769181], [1577869367988, 6408.749636232671], [1577872864963, 6408.922572379971], [1577876736509, 6416.878539022916], [1577880529069, 6416.232375709836], [1577883926430, 6420.0381517729265], [1577887639980, 6415.875056068972], [1577890824719, 6440.739721596347], [1577894995373, 6430.386758909359], [1577898034524, 6458.564511092221], [1577901618835, 6447.260372770252], [1577905779503, 6427.049100904037], [1577908846483, 6418.772496993268], [1577912653436, 6448.265169960227], [1577916261128, 6424.911291990242], [1577919763140, 6412.022709010401]]
+	# 	midnight_price = get_midnight_price(date_str, day_prices, prev_day_prices)
+	# 	expected = 6413.051795808254
 
-		print(price_date_dict)
+	# 	self.assertEqual(midnight_price, expected)		
+
+
+	# def test_find_longest_bearish_trend(self):
+	# 	data = load_file("prices_1_month2.json")
+	# 	longest_bearish_trend = find_longest_bearish_trend(data)
+	# 	expected = 2
+
+	# 	self.assertEqual(longest_bearish_trend, expected)
+
+
+	# def test_find_longest_bearish_trend2(self):
+	# 	data = load_file("prices.json")
+	# 	longest_bearish_trend = find_longest_bearish_trend(data)
+	# 	expected = 7
+
+	# 	self.assertEqual(longest_bearish_trend, expected)
+
+	def test_get_highest_trading_volume(self):
+		data = load_file("prices.json")
+		highest_volume_date, highest_volume = get_highest_trading_volume(data)
+		expected_date = "2020-02-11"
+		expected_volume = 74607356578.95918
+
+		self.assertEqual(highest_volume_date, expected_date)
+		self.assertEqual(highest_volume, expected_volume)
+
+		data2 = load_file('prices_1_month2.json')
+
+		highest_volume_date2, highest_volume2 = get_highest_trading_volume(data2)
+		expected_date2 = "2020-01-15"
+		expected_volume2 = 50796448042.52202
+
+		self.assertEqual(highest_volume_date2, expected_date2)
+		self.assertEqual(highest_volume2, expected_volume2)
 
 
 if __name__ == '__main__':
