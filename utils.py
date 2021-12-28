@@ -191,6 +191,22 @@ def add_hour(timestamp):
 	return hour_later 
 
 
+# Check if the midnight prices of the date range are decreasing each date.
+def downward_only(data):
+	prices = data['prices']
+	prices_df = pd.DataFrame(prices, columns=["Timestamp", "Price"])
+
+	# Ensure that data is sorted by the date, ascending.
+	prices_df = prices_df.sort_values(by="Timestamp", ascending=True)
+	# Take only the prices column and transform it to a list.
+	prices_arr = prices_df['Price'].tolist()
+
+	# Check if each prices is smaller than the price preceding it.
+	is_downward_only = all(ii > jj for ii, jj in zip(prices_arr, prices_arr[1:]))
+
+	return is_downward_only
+
+
 def get_highest_trading_volume(data):
 	# Get the volumes data.
 	total_volumes = data['total_volumes']
@@ -204,8 +220,7 @@ def get_highest_trading_volume(data):
 	return highest_volume_date, highest_volume['Volume']
 
 
-# Find the longest bearish (downward) trend from the midnight currency prices of the chosen date range.
-def find_longest_bearish_trend(data):
+def get_midnight_prices(data):
 	# Get a list of dates (2021-12-24) between the from and to -dates of the range.
 	days = get_days(data)
 	# Create a dictionary, where keys are distinct dates of the date ranges, and for every key, there's an empty list.
@@ -215,9 +230,6 @@ def find_longest_bearish_trend(data):
 
 	midnight_prices = {}
 	prev_date = None
-	prev_price = None
-	longest_bearish_trend = 0
-	bearish_length = 0
 
 	# Iterate through each date and date's available prices, in order to find the bearish trends, ie. the maximum amount of days,
 	# when the midnight/closest to midnight price of the currency was lower than previous day's same price.
@@ -234,8 +246,43 @@ def find_longest_bearish_trend(data):
 		# Get the day's price which is closest to the midnight.
 		midnight_price = get_midnight_price(date_str, day_prices, prev_day_prices)
 
+		midnight_prices[date_str] = midnight_price
+
 		# Set the previous date.
-		prev_date = date_str
+		prev_date = date_str		
+
+	return midnight_prices
+
+
+def get_days_to_by_and_sell(data):
+	if downward_only(data):
+		date_to_buy = "Don't buy"
+		date_to_sell = "Don't sell"
+	else:
+		midnight_prices = get_midnight_prices(data)
+		prices = pd.DataFrame.from_dict(midnight_prices, orient='index', columns=["Price"])
+		
+		# Find the lowest price, ie. date to buy.
+		date_to_buy = prices["Price"].idxmin()
+
+		# Find the highest price, ie. date to sell.
+		date_to_sell = prices["Price"].idxmax()
+
+	return date_to_buy, date_to_sell
+
+
+# Find the longest bearish (downward) trend from the midnight currency prices of the chosen date range.
+def find_longest_bearish_trend(data):
+	midnight_prices = get_midnight_prices(data)
+
+	longest_bearish_trend = 0
+	bearish_length = 0
+	prev_price = None
+
+	# Iterate through each date and date's available prices, in order to find the bearish trends, ie. the maximum amount of days,
+	# when the midnight/closest to midnight price of the currency was lower than previous day's same price.
+	for date_str in midnight_prices:
+		midnight_price = midnight_prices[date_str]
 
 		# No calculations to be made on the first round of iteration.
 		if prev_price is None:
