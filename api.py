@@ -4,11 +4,12 @@ from utils import datetime_to_timestamp, add_hour, get_data, timestamp_to_date, 
 
 
 app = flask.Flask(__name__)
-app.config["DEBUG"] = True
+app.config["DEBUG"] = False
 
 
 @app.route('/', methods=["GET"])
 def home():
+	# Render the home page.
 	return render_template("index.html")
 
 
@@ -46,6 +47,7 @@ def bitcoin(crypto_currency, fiat_currency, start_date, end_date):
 			# If there were errors, return them.
 			return data
 	else:
+		# If there were errors, return them.
 		return url_data
 
 
