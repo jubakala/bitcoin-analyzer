@@ -1,6 +1,6 @@
 import flask
-from flask import request, jsonify
-from utils import datetime_to_timestamp, add_hour, get_data, load_file, timestamp_to_date, get_days, create_price_date_dict, organize_prices_by_date, get_midnight_price, find_longest_bearish_trend, form_url, get_highest_trading_volume, downward_only, get_midnight_prices, get_days_to_by_and_sell
+from flask import request, jsonify, render_template
+from utils import datetime_to_timestamp, add_hour, get_data, timestamp_to_date, get_days, create_price_date_dict, organize_prices_by_date, get_midnight_price, find_longest_bearish_trend, form_url, get_highest_trading_volume, downward_only, get_midnight_prices, get_days_to_by_and_sell
 
 
 app = flask.Flask(__name__)
@@ -9,7 +9,7 @@ app.config["DEBUG"] = True
 
 @app.route('/', methods=["GET"])
 def home():
-	return "<h1>Hello, World!</h1>"
+	return render_template("index.html")
 
 
 @app.route('/coins/<crypto_currency>/<fiat_currency>/<start_date>/<end_date>', methods=["GET"])
@@ -46,7 +46,7 @@ def bitcoin(crypto_currency, fiat_currency, start_date, end_date):
 			# If there were errors, return them.
 			return data
 	else:
-		pass	
+		return url_data
 
 
 app.run()

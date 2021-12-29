@@ -24,25 +24,28 @@ def form_url(crypto_currency, fiat_currency, start_datetime, end_datetime):
 	start_timestamp = datetime_to_timestamp(start_datetime[0:10])
 	end_timestamp = datetime_to_timestamp(end_datetime[0:10])
 
-	if start_timestamp != None and end_timestamp != None:
-		# Check out that the timestamps are in correct order, ie. start_timestamp is smaller. Check also that the dates are not the same.
-		if start_timestamp < end_timestamp:
-			from_timestamp = start_timestamp
-			to_timestamp = end_timestamp
-		elif end_timestamp < start_timestamp:
-			from_timestamp = end_timestamp
-			to_timestamp = start_timestamp
-		else: # Both are the same date
-			url_data['error'] = "Dates can't be the same."
+	if start_timestamp != end_timestamp:
+		if start_timestamp != None and end_timestamp != None:
+			# Check out that the timestamps are in correct order, ie. start_timestamp is smaller. Check also that the dates are not the same.
+			if start_timestamp < end_timestamp:
+				from_timestamp = start_timestamp
+				to_timestamp = end_timestamp
+			elif end_timestamp < start_timestamp:
+				from_timestamp = end_timestamp
+				to_timestamp = start_timestamp
+			else: # Both are the same date
+				url_data['error'] = "Dates can't be the same."
 
-		# Add one hour to the to_timestamp.
-		to_timestamp = add_hour(to_timestamp)
+			# Add one hour to the to_timestamp.
+			to_timestamp = add_hour(to_timestamp)
+		else:
+			url_data['error'] = "Start or end date, or both, are invalid. Dates must be in form '2021-12-31'."
+
+		# If there's no errors.
+		if len(url_data['error']) == 0:
+			url_data['url'] = f"https://api.coingecko.com/api/v3/coins/{crypto_currency}/market_chart/range?vs_currency={fiat_currency}&from={int(from_timestamp)}&to={int(to_timestamp)}"
 	else:
-		url_data['error'] = "Start or end date, or both, are invalid. Dates must be in form '2021-12-31'."
-
-	# If there's no errors.
-	if len(url_data['error']) == 0:
-		url_data['url'] = f"https://api.coingecko.com/api/v3/coins/{crypto_currency}/market_chart/range?vs_currency={fiat_currency}&from={int(from_timestamp)}&to={int(to_timestamp)}"
+		url_data['error'] = "Start and end dates can't be the same!"
 
 	return url_data
 

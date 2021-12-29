@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en" class="h-100">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ScroogeNator</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.1/examples/cover/">
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+    <script>
+      $SCRIPT_ROOT = {{ request.script_root|tojson }};
+    </script>    
+
+    <script>
+      $(document).ready(function() {
+        function createUrl(startDate, endDate) {
+          return $SCRIPT_ROOT + '/coins/bitcoin/eur/' + startDate + '/' + endDate;
+        }
+
+        function formatDate(dateStr) {
+          // Date string will contain word Don't, if there's no good day to buy or sell.
+          if (dateStr.includes("Don't") == false) {
+              try {
+                  const d = new Date(dateStr);
+                  let day = d.getDate().toString();
+                  let month = (d.getMonth() + 1).toString();
+
+                  if (parseInt(day) < 10) {
+                    day = "0" + day;
+                  }
+
+                  if (parseInt(month) < 10) {
+                    month = "0" + month;
+                  }
+
+                  dateStr = day + "." + month + "." + d.getFullYear();
+              } catch (e) {}
+          } 
+
+          return dateStr;
+        }
+
+
+        $(function() {
+            $('#bitcoin-data').bind('click', function() {
+                const startDate = $("#start-datepicker").val();
+                const endDate = $("#end-datepicker").val();
+                const url = createUrl(startDate, endDate);
+
+                // Get data from the API.
+                $.getJSON(url, function (data) {
+                    console.log(data);
+                    $("table").hide();
+                    $("#errors").hide();
+                    
+                    if (data['error'] == undefined || data['error'].length == 0) {
+                        $("#date-to-buy").text(formatDate(data.buy_sell.date_to_buy));
+                        $("#date-to-sell").text(formatDate(data.buy_sell.date_to_sell));
+                        $("#bearish").text(data.trends.longest_bearish_trend + " days");
+                        $("#high-vol-date").text(formatDate(data.volumes.highest_volume_date));
+                        $("#high-vol").text(data.volumes.highest_volume.toLocaleString().replace(".", " ") + " €");
+                        // Show data table.
+                        $("table").toggle();           
+                    } else {
+                        $("#errors").text(data['error']);
+                        $("#errors").show();
+                    }                  
+                });
+
+                return false;
+            });
+        });
+        
+        // Initialize datepickers.
+        const options = {
+          dateFormat: "yy-mm-dd",
+          maxDate: -1
+        };
+
+        $("#start-datepicker").datepicker(options);
+        $("#end-datepicker").datepicker(options);
+      });
+    </script>
+    <style>
+      .table {
+        display: none;
+        color: white;
+      }
+
+      td.title {
+        font-weight: bold;
+      }
+
+      #errors {
+        display: none;
+        color: red;
+        font-weight: bold;
+      }
+
+      .mt-50  { margin-top: 50px; }
+      .mt-150 { margin-top: 150px; }
+
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body class="text-white bg-dark">
+    <div class="container">
+      <div class="row">
+        <div class="mt-150 col-sm-12 text-center">
+          <h1>Choose start and end date for Bitcoin data:</h1>
+          <p>Start date: <input type="text" id="start-datepicker"> End date: <input type="text" id="end-datepicker"></p>
+          <p><button class="btn btn-info" id="bitcoin-data">Get Bitcoin data</button></p>
+        </div>
+      </div>
+      <div class="row mt-50">
+        <div class="col-sm-2">&nbsp;</div>
+        <div class="col-sm-8">
+          <p id="errors" class="text-center"></p>
+          <table class="table">
+            <tbody>
+              <tr>
+                <td class="title">Day to buy:</td>
+                <td id="date-to-buy"></td>
+                <td class="title">Day to sell:</td>
+                <td id="date-to-sell"></td>
+              </tr>
+              <tr>
+                <td class="title">Longest bearish trend:</td>
+                <td colspan="3" id="bearish"></td>
+              </tr>
+              <tr>
+                <td class="title">Highest volume date:</td>
+                <td id="high-vol-date"></td>
+                <td class="title">Highest volume:</td>
+                <td id="high-vol"></td>                
+              </tr>              
+            </tbody>
+          </table>          
+        </div>
+        <div class="col-sm-2">&nbsp;</div>
+      </div>
+    </div>
+    </div>
+  </body>
+</html>
