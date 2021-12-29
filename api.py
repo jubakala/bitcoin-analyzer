@@ -1,6 +1,6 @@
 import flask
 from flask import request, jsonify, render_template
-from utils import datetime_to_timestamp, add_hour, get_data, timestamp_to_date, get_days, create_price_date_dict, organize_prices_by_date, get_midnight_price, find_longest_bearish_trend, form_url, get_highest_trading_volume, downward_only, get_midnight_prices, get_days_to_by_and_sell
+from utils import get_data, find_longest_bearish_trend, form_url, get_highest_trading_volume, get_days_to_by_and_sell
 
 
 app = flask.Flask(__name__)
