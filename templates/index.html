@@ -62,7 +62,7 @@
                         $("#date-to-sell").text(formatDate(data.buy_sell.date_to_sell));
                         $("#bearish").text(data.trends.longest_bearish_trend + " days");
                         $("#high-vol-date").text(formatDate(data.volumes.highest_volume_date));
-                        $("#high-vol").text(data.volumes.highest_volume.toLocaleString().replaceAll(",", " ") + " €");
+                        $("#high-vol").text(data.volumes.highest_volume.toLocaleString().replaceAll(",", " ").replaceAll(".", ",") + " €");
                         // Show data table.
                         $("table").toggle();           
                     } else {

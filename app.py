@@ -1,9 +1,14 @@
+import os
 import flask
 from flask import request, jsonify, render_template
 from utils import get_data, find_longest_bearish_trend, form_url, get_highest_trading_volume, get_days_to_by_and_sell
 
 
-app = flask.Flask(__name__)
+app = flask.Flask(__name__, 
+	static_url_path='',
+	static_folder='static/',
+	template_folder='templates')
+
 app.config["DEBUG"] = False
 
 
@@ -11,6 +16,11 @@ app.config["DEBUG"] = False
 def home():
 	# Render the home page.
 	return render_template("index.html")
+
+
+@app.route('/favicon.ico')
+def favicon():
+	return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico',mimetype='image/vnd.microsoft.icon')
 
 
 @app.route('/coins/<crypto_currency>/<fiat_currency>/<start_date>/<end_date>', methods=["GET"])
@@ -51,4 +61,5 @@ def bitcoin(crypto_currency, fiat_currency, start_date, end_date):
 		return url_data
 
 
-app.run()
+if __name__ == '__main__':
+	app.run()
