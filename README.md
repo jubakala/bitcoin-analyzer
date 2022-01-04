@@ -16,7 +16,7 @@ $ ```python3 -m venv venv```
 $ ```source venv/bin/activate```
 
 - **Install dependencies. (The process may recommend to upgrade pip, but it can be ignored this time.)**  
-$ python3 -m pip install -r requirements.txt
+$ ```python3 -m pip install -r requirements.txt```
 
 - **Run the app.**  
 $ ```flask run``` or  ```python3 app.py```  
